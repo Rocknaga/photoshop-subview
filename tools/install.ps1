@@ -4,21 +4,24 @@
 # 直したら、もう一度これを流す（前の版を外してから入れ直す）。外すだけなら -Remove。
 #
 # 使いかた: npm run install:ps      外す: npm run install:ps -- -Remove
+#           配る .ccx を作るだけ（入れない）: npm run pack
 # このファイルは BOM 付き UTF-8 で保存する（無いと PowerShell 5 が Shift_JIS として読み、日本語で崩れる）
-param([switch]$Remove)
+param([switch]$Remove, [switch]$PackOnly)
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
 $upia = 'C:\Program Files\Common Files\Adobe\Adobe Desktop Common\RemoteComponents\UPI\UnifiedPluginInstallerAgent\UnifiedPluginInstallerAgent.exe'
-if (-not (Test-Path $upia)) { throw "Adobe のプラグインインストーラが見つかりません（Creative Cloud を入れ直す）: $upia" }
+if (-not $PackOnly -and -not (Test-Path $upia)) { throw "Adobe のプラグインインストーラが見つかりません（Creative Cloud を入れ直す）: $upia" }
 
 $manifest = Get-Content (Join-Path $root 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $name = $manifest.name
 
 # 前の版を外す（入っていなければ何もしない）。同じ版の番号のままだと、外さずに入れ直そうとして断られる
-Write-Host "前の版を外します: $name"
-& $upia /remove $name | Out-Host
-if ($Remove) { Write-Host '外しました。'; exit 0 }
+if (-not $PackOnly) {
+  Write-Host "前の版を外します: $name"
+  & $upia /remove $name | Out-Host
+  if ($Remove) { Write-Host '外しました。'; exit 0 }
+}
 
 # パネルに要るものだけを詰める（テスト・node_modules・説明書は入れない）
 $dist = Join-Path $root 'dist'
@@ -40,6 +43,7 @@ try {
   }
 } finally { $zip.Dispose() }
 Write-Host "詰めました: $ccx（$($files.Count) 個）"
+if ($PackOnly) { exit 0 }
 
 Write-Host 'Photoshop に入れます'
 & $upia /install $ccx | Out-Host

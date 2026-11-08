@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node test/codec-tests.js && node test/unit-tests.js",
     "test:ui": "node test/ui-smoke.js",
-    "install:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/install.ps1"
+    "install:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/install.ps1",
+    "pack": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/install.ps1 -PackOnly"
   },
   "devDependencies": {
     "playwright": "1.63.0"
