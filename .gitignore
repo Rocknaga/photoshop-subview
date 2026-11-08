@@ -1,0 +1,11 @@
+# 取得物・生成物
+node_modules/
+*.ccx
+*.zip
+*.log
+
+# OS が勝手に作るもの
+Thumbs.db
+desktop.ini
+.DS_Store
+dist/

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <!-- 上段: 前後送りと見え方 -->
+  <div class="bar">
+    <sp-action-button quiet id="prev" title="前へ（←）">‹</sp-action-button>
+    <span id="pos" class="dim">0 / 0</span>
+    <sp-action-button quiet id="next" title="次へ（→）">›</sp-action-button>
+    <span class="sep"></span>
+    <sp-action-button quiet id="flip" title="左右反転（H）。回していても画面の左右で返す">左右</sp-action-button>
+    <sp-action-button quiet id="flipv" title="上下反転（V）">上下</sp-action-button>
+    <sp-action-button quiet id="gray" title="白黒（明暗だけ）で見る（G）。拾う色は元の色">白黒</sp-action-button>
+    <span class="grow"></span>
+    <sp-action-button quiet id="picker" title="スポイト（I）・Alt＋クリックでもいつでも拾える">スポイト</sp-action-button>
+  </div>
+
+  <!-- 表示 -->
+  <div id="stage">
+    <img id="img" alt="" draggable="false">
+    <img id="dropper" src="icons/dropper.png" alt="" draggable="false">
+    <div id="empty">
+      <div class="empty-title">サブビュー</div>
+      <div class="dim">資料を並べて、拡大・反転・白黒・露光量や彩度の調整で見ながら色を拾えます</div>
+      <div class="empty-actions">
+        <sp-action-button id="e-file">ファイルから</sp-action-button>
+        <sp-action-button id="e-canvas">いまのキャンバス</sp-action-button>
+      </div>
+    </div>
+    <div id="busy" class="pill">読み込み中…</div>
+    <div id="name" class="pill dim"></div>
+  </div>
+
+  <!-- 中段: 倍率・角度・拾った色 -->
+  <div class="bar">
+    <sp-action-button quiet id="fit" title="全体を表示（0）・絵のダブルクリックでも戻る">全体</sp-action-button>
+    <sp-action-button quiet id="z100" title="等倍（1）">100%</sp-action-button>
+    <sp-action-button quiet id="zout" title="縮小（ホイール下・Ctrl＋Alt＋クリック）">−</sp-action-button>
+    <input id="zoomr" class="slider" type="range" min="0" max="1000" step="1" value="500" title="倍率">
+    <sp-action-button quiet id="zin" title="拡大（ホイール上・Ctrl＋クリック）">＋</sp-action-button>
+    <input id="zoomv" class="num" type="text" value="—" title="倍率。数字を入れて Enter">
+  </div>
+  <div class="bar">
+    <sp-action-button quiet id="rotl" title="左へ 15° 回す（Shift＋R）">⟲</sp-action-button>
+    <input id="angle" class="slider" type="range" min="-180" max="180" step="1" value="0" title="角度（0°・±90°・180° の近くで止まる）">
+    <sp-action-button quiet id="rot" title="右へ 15° 回す（R）">⟳</sp-action-button>
+    <sp-action-button quiet id="rot0" title="角度を 0° に戻す">0°</sp-action-button>
+  </div>
+  <!-- 調整レイヤー（Lightroom の基本補正と同じ項目）。上にあるものが後からかかる。見え方だけで、拾う色は元の色 -->
+  <div id="adjpane">
+    <div id="adj-list"></div>
+    <div class="bar">
+      <select id="adj-add" title="調整レイヤーを足す（いちばん上に入る）"></select>
+      <span class="grow"></span>
+      <span class="dim small">拾う色は元の色</span>
+    </div>
+  </div>
+  <div class="bar">
+    <sp-action-button quiet id="radius" title="スポイトの範囲（1 画素／3×3／5×5 の平均）">3×3</sp-action-button>
+    <div id="chip" title="拾った色（スポイト中はカーソル下の色）"></div>
+    <span id="hex" class="num"></span>
+    <span class="grow"></span>
+    <sp-action-button quiet id="adjBtn" title="露光量・コントラスト・彩度などの調整レイヤーを開く／閉じる">調整</sp-action-button>
+  </div>
+  <div id="swatches" title="拾った色。押すと描画色に戻せる"></div>
+
+  <!-- 下段: 並び -->
+  <div id="strip"></div>
+  <div class="bar">
+    <sp-action-button id="addFile" title="画像ファイルを足す（PNG / JPEG）">＋ファイル</sp-action-button>
+    <sp-action-button id="addCanvas" title="開いている書類をいまの状態で写す">＋キャンバス</sp-action-button>
+    <span class="grow"></span>
+    <sp-action-button quiet id="follow" title="写したキャンバスを、描くたびに自動で写し直す">追従</sp-action-button>
+    <sp-action-button quiet id="remove" title="この画像を並びから外す（元のファイルはそのまま）">外す</sp-action-button>
+  </div>
+  <div id="status" class="dim"></div>
+
+</div>
+<script src="main.js"></script>
+</body>
+</html>

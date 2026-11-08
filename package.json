@@ -1,0 +1,15 @@
+{
+  "name": "photoshop-subview",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Photoshop 用のサブビュー（UXP パネル）。資料を見ながら色を拾う",
+  "scripts": {
+    "test": "node test/codec-tests.js && node test/unit-tests.js",
+    "test:ui": "node test/ui-smoke.js",
+    "install:ps": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/install.ps1"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "license": "MIT"
+}

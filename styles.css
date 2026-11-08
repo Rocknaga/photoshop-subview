@@ -1,0 +1,72 @@
+/* Photoshop の色に合わせる（明るさの設定に追従する） */
+:root {
+  --bg: var(--uxp-host-background-color, #323232);
+  --fg: var(--uxp-host-text-color, #e0e0e0);
+  --line: var(--uxp-host-border-color, #4a4a4a);
+  --dim: var(--uxp-host-text-color-secondary, #9a9a9a);
+  --stage: #262626;
+  --accent: #2680eb;
+}
+body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-size: 12px; }
+#app { position: relative; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+.bar { display: flex; flex-direction: row; align-items: center; padding: 2px 4px; min-height: 30px; flex-shrink: 0; }
+.bar sp-action-button { margin: 0 1px; flex-shrink: 0; } /* 細いパネルでも「全体」などが 2 行に折れないように */
+.row { display: flex; flex-direction: row; align-items: center; padding: 2px 6px; flex-shrink: 0; flex-wrap: wrap; }
+.grow { flex-grow: 1; }
+.sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
+.dim { color: var(--dim); }
+.num { min-width: 40px; text-align: center; }
+#pos { min-width: 40px; text-align: center; }
+/* つまみは残りの幅を使う。細いパネルでも消えないように最小の幅を持たせる */
+.slider { flex-grow: 1; flex-shrink: 1; width: 40px; min-width: 36px; margin: 0 4px; }
+#zoomv { width: 42px; min-width: 42px; flex-shrink: 0; font-size: 11px; padding: 0 2px; background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 2px; }
+
+/* 表示面: 余計なものを置かない。資料の周りは暗いグレー（色の判断を狂わせない中間色寄り） */
+#stage { position: relative; flex-grow: 1; min-height: 120px; background: var(--stage); overflow: hidden; }
+#img { position: absolute; left: 0; top: 0; display: none; pointer-events: none; user-select: none; }
+/* スポイト中・Alt を押している間はスポイトの形（先が左下 = 拾う所）。絵のカーソルを受け付けない環境では十字になる */
+#stage.picker { cursor: crosshair; cursor: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 21l1.2-4.2L14 7l3 3-9.8 9.8z' fill='white' stroke='black' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M13 6l2.6-2.6a2.1 2.1 0 0 1 3 3L18 8l1 1-1.6 1.6-6-6L13 3z' fill='black' stroke='white' stroke-width='0.8'/%3E%3C/svg%3E") 3 21, crosshair; }
+#stage.panning { cursor: grabbing; }
+/* Photoshop のパネルはカーソルの形を変えられないので、スポイトの絵をマウスの先に付けて動かす（main.js の drawDropper） */
+#dropper { position: absolute; left: 0; top: 0; width: 24px; height: 24px; display: none; pointer-events: none; }
+
+#empty { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; text-align: center; }
+.empty-title { font-size: 15px; margin-bottom: 6px; }
+.empty-actions { display: flex; flex-direction: column; margin-top: 12px; }
+.empty-actions sp-action-button { margin: 3px 0; }
+
+.pill { position: absolute; padding: 2px 8px; border-radius: 10px; background: rgba(0, 0, 0, 0.55); color: #ddd; font-size: 11px; display: none; }
+#busy { right: 6px; top: 6px; }
+#name { left: 6px; bottom: 6px; max-width: 80%; overflow: hidden; }
+
+/* 調整レイヤー。開いている間だけ出す（UXP は [hidden] が効かないので display で切り替える） */
+#adjpane { display: none; flex-direction: column; flex-shrink: 0; border-top: 1px solid var(--line); }
+#adjpane.open { display: flex; }
+.adj-row { display: flex; flex-direction: row; align-items: center; padding: 1px 4px; min-height: 28px; flex-shrink: 0; }
+.adj-row sp-action-button { margin: 0 1px; flex-shrink: 0; }
+.adj-row.off .adj-name, .adj-row.off .adj-v { color: var(--dim); }
+.adj-name { width: 62px; flex-shrink: 0; font-size: 10px; overflow: hidden; white-space: nowrap; }
+#adj-add { margin: 2px; min-width: 120px; }
+.adj-v { width: 34px; min-width: 34px; flex-shrink: 0; font-size: 11px; text-align: right; }
+.small { font-size: 10px; }
+#chip { width: 22px; height: 22px; border: 1px solid var(--line); border-radius: 3px; background: transparent; margin-right: 4px; }
+#hex { min-width: 0; flex-shrink: 1; overflow: hidden; white-space: nowrap; text-align: left; font-size: 11px; }
+
+#swatches { display: flex; flex-direction: row; padding: 0 6px 2px; min-height: 0; flex-shrink: 0; flex-wrap: wrap; }
+.sw { width: 18px; height: 18px; margin: 1px; border: 1px solid var(--line); border-radius: 2px; }
+
+/* 並び（フィルムストリップ） */
+#strip { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 4px; height: 64px; flex-shrink: 0; border-top: 1px solid var(--line); }
+.cell { position: relative; width: 56px; height: 56px; margin-right: 4px; flex-shrink: 0; border: 2px solid transparent; border-radius: 3px; background: var(--stage); overflow: hidden; }
+.cell.current { border-color: var(--accent); }
+/* Ctrl＋クリックで印を付けたもの（まとめて外す）。今の画像の青と見分けが付く色にする */
+.cell.marked { border-color: #e8a33d; }
+.cell .mark { position: absolute; left: 2px; top: 1px; font-size: 10px; padding: 0 3px; border-radius: 3px; background: #e8a33d; color: #000; }
+.cell.dragging { border-style: dashed; }
+.cell img { position: absolute; }
+.cell .lbl { position: absolute; left: 2px; right: 2px; bottom: 1px; font-size: 9px; color: #ccc; overflow: hidden; white-space: nowrap; }
+.cell .tag { position: absolute; right: 2px; top: 1px; font-size: 9px; padding: 0 3px; border-radius: 3px; background: rgba(0, 0, 0, 0.6); color: #fff; }
+
+#status { padding: 2px 8px 4px; min-height: 16px; flex-shrink: 0; font-size: 11px; }
+
