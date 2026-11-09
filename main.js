@@ -967,7 +967,7 @@ function drawAdj() {
   if (!adj.length) {
     const e = document.createElement('div');
     e.className = 'adj-row dim small';
-    e.textContent = 'まだありません。下の「＋明度」「＋彩度」で足します';
+    e.textContent = 'まだありません。下の「＋ 調整を足す…」から選びます';
     list.appendChild(e);
     return;
   }
